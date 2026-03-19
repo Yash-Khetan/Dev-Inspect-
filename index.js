@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import axios from "axios";
+import axios from "axios"; 
+import { getGitHubData, analyzeGitHubData, buildPromptData } from "./caller.js";
+import { resume, roast } from "./apicalls.js";
+
+
 
 const program = new Command();
 
@@ -103,4 +107,37 @@ program
     });
   });
 
-program.parse();
+
+
+
+program
+  .command('resume')
+  .description('Get professional summary of the github')
+  .requiredOption('--username <username>')
+  .action(async (options) => {
+    const data = await getGitHubData(options.username);
+    if (!data) return;
+
+    const analysis = analyzeGitHubData(data);
+    const github_data = buildPromptData(analysis);
+
+    await resume(github_data);
+  });
+
+
+program
+  .command('roast')
+  .description('Get a witty roast for your github')
+  .requiredOption('--username <username>')
+  .action(async (options) => {
+    const data = await getGitHubData(options.username);
+    if (!data) return;
+
+    const analysis = analyzeGitHubData(data);
+    const github_data = buildPromptData(analysis);
+
+    await roast(github_data);
+  });
+
+
+  program.parse();
